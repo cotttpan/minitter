@@ -2,6 +2,7 @@ export default function minitter<T>() {
     const listeners: { [k: string]: Function[] } = {};
     return {
         on,
+        once,
         off,
         emit,
         listenerCount,
@@ -16,6 +17,15 @@ export default function minitter<T>() {
             listeners[event].push(listener);
         } else {
             listeners[event] = [listener];
+        }
+    }
+
+    function once<K extends keyof T>(event: K, listener: (arg: T[K]) => any) {
+        on(event, wrapped);
+
+        function wrapped() {
+            listener.apply(null, arguments);
+            off(event, wrapped);
         }
     }
 
