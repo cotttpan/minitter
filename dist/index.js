@@ -4,6 +4,7 @@ function minitter() {
     const listeners = {};
     return {
         on,
+        once,
         off,
         emit,
         listenerCount,
@@ -17,6 +18,13 @@ function minitter() {
         }
         else {
             listeners[event] = [listener];
+        }
+    }
+    function once(event, listener) {
+        on(event, wrapped);
+        function wrapped() {
+            listener.apply(null, arguments);
+            off(event, wrapped);
         }
     }
     function off(event, listener) {
