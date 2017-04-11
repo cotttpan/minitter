@@ -1,50 +1,43 @@
-export default function minitter<T>() {
-    const listeners: { [k: string]: Function[] } = {};
-    return {
-        on,
-        once,
-        off,
-        emit,
-        listenerCount,
-    };
+export default class Minitter<T> {
+    private _listeners: { [k: string]: Function[] } = {};
 
-    function listenerCount<K extends keyof T>(event: K) {
-        return listeners[event] ? listeners[event].length : 0;
-    }
-
-    function on<K extends keyof T>(event: K, listener: (arg: T[K]) => any) {
-        if (_.has(listeners, event) && !_.includes(listeners[event], listener)) {
-            listeners[event].push(listener);
+    on<K extends keyof T>(event: K, listener: Listener<T, K>) {
+        if (has(this._listeners, event) && !includes(this._listeners[event], listener)) {
+            this._listeners[event].push(listener);
         } else {
-            listeners[event] = [listener];
+            this._listeners[event] = [listener];
         }
     }
 
-    function once<K extends keyof T>(event: K, listener: (arg: T[K]) => any) {
-        on(event, wrapped);
+    once<K extends keyof T>(event: K, listener: Listener<T, K>) {
+        const wrapped = (arg: any) => {
+            listener(arg);
+            this.off(event, wrapped);
+        };
+        this.on(event, wrapped);
+    }
 
-        function wrapped() {
-            listener.apply(null, arguments);
-            off(event, wrapped);
+    off<K extends keyof T>(event: K, listener: Listener<T, K>) {
+        this._listeners[event] = this._listeners[event].filter(x => x !== listener);
+    }
+
+    emit<K extends keyof T>(event: K, arg: T[K]) {
+        if (this._listeners[event]) {
+            this._listeners[event].forEach(f => f(arg));
         }
     }
 
-    function off<K extends keyof T>(event: K, listener: (arg: T[K]) => any) {
-        listeners[event] = listeners[event].filter(l => l !== listener);
-    }
-
-    function emit<K extends keyof T>(event: K, arg: T[K]) {
-        if (listeners[event]) {
-            listeners[event].forEach(f => f.call(null, arg));
-        }
+    listenerCount<K extends keyof T>(event: K, ) {
+        return this._listeners[event] ? this._listeners[event].length : 0;
     }
 }
 
-namespace _ {
-    export function includes<T>(arr: T[], target: T) {
-        return arr.indexOf(target) >= 0;
-    }
-    export function has(obj: object, target: string) {
-        return obj.hasOwnProperty(target);
-    }
+export type Listener<T, K extends keyof T> = (arg: T[K]) => any;
+
+export function includes<T>(arr: T[], target: T) {
+    return arr.indexOf(target) >= 0;
+}
+
+export function has(obj: object, target: string) {
+    return obj.hasOwnProperty(target);
 }
