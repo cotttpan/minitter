@@ -1,51 +1,43 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function minitter() {
-    const listeners = {};
-    return {
-        on,
-        once,
-        off,
-        emit,
-        listenerCount,
-    };
-    function listenerCount(event) {
-        return listeners[event] ? listeners[event].length : 0;
+class Minitter {
+    constructor() {
+        this._listeners = {};
     }
-    function on(event, listener) {
-        if (_.has(listeners, event) && !_.includes(listeners[event], listener)) {
-            listeners[event].push(listener);
+    on(event, listener) {
+        if (has(this._listeners, event) && !includes(this._listeners[event], listener)) {
+            this._listeners[event].push(listener);
         }
         else {
-            listeners[event] = [listener];
+            this._listeners[event] = [listener];
         }
     }
-    function once(event, listener) {
-        on(event, wrapped);
-        function wrapped() {
-            listener.apply(null, arguments);
-            off(event, wrapped);
+    once(event, listener) {
+        const wrapped = (arg) => {
+            listener(arg);
+            this.off(event, wrapped);
+        };
+        this.on(event, wrapped);
+    }
+    off(event, listener) {
+        this._listeners[event] = this._listeners[event].filter(x => x !== listener);
+    }
+    emit(event, arg) {
+        if (this._listeners[event]) {
+            this._listeners[event].forEach(f => f(arg));
         }
     }
-    function off(event, listener) {
-        listeners[event] = listeners[event].filter(l => l !== listener);
-    }
-    function emit(event, arg) {
-        if (listeners[event]) {
-            listeners[event].forEach(f => f.call(null, arg));
-        }
+    listenerCount(event) {
+        return this._listeners[event] ? this._listeners[event].length : 0;
     }
 }
-exports.default = minitter;
-var _;
-(function (_) {
-    function includes(arr, target) {
-        return arr.indexOf(target) >= 0;
-    }
-    _.includes = includes;
-    function has(obj, target) {
-        return obj.hasOwnProperty(target);
-    }
-    _.has = has;
-})(_ || (_ = {}));
+exports.default = Minitter;
+function includes(arr, target) {
+    return arr.indexOf(target) >= 0;
+}
+exports.includes = includes;
+function has(obj, target) {
+    return obj.hasOwnProperty(target);
+}
+exports.has = has;
 //# sourceMappingURL=index.js.map

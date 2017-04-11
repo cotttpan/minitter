@@ -1,7 +1,11 @@
-export default function minitter<T>(): {
-    on: <K extends keyof T>(event: K, listener: (arg: T[K]) => any) => void;
-    once: <K extends keyof T>(event: K, listener: (arg: T[K]) => any) => void;
-    off: <K extends keyof T>(event: K, listener: (arg: T[K]) => any) => void;
-    emit: <K extends keyof T>(event: K, arg: T[K]) => void;
-    listenerCount: <K extends keyof T>(event: K) => number;
-};
+export default class Minitter<T> {
+    private _listeners;
+    on<K extends keyof T>(event: K, listener: Listener<T, K>): void;
+    once<K extends keyof T>(event: K, listener: Listener<T, K>): void;
+    off<K extends keyof T>(event: K, listener: Listener<T, K>): void;
+    emit<K extends keyof T>(event: K, arg: T[K]): void;
+    listenerCount<K extends keyof T>(event: K): number;
+}
+export declare type Listener<T, K extends keyof T> = (arg: T[K]) => any;
+export declare function includes<T>(arr: T[], target: T): boolean;
+export declare function has(obj: object, target: string): boolean;
