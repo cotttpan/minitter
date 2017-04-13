@@ -7,6 +7,7 @@ export default class Minitter<T> {
         } else {
             this._listeners[event] = [listener];
         }
+        return listener;
     }
 
     once<K extends keyof T>(event: K, listener: Listener<T, K>) {
@@ -19,12 +20,14 @@ export default class Minitter<T> {
 
     off<K extends keyof T>(event: K, listener: Listener<T, K>) {
         this._listeners[event] = this._listeners[event].filter(x => x !== listener);
+        return listener;
     }
 
     emit<K extends keyof T>(event: K, arg: T[K]) {
         if (this._listeners[event]) {
             this._listeners[event].forEach(f => f(arg));
         }
+        return arg;
     }
 
     listenerCount<K extends keyof T>(event: K, ) {

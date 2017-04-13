@@ -14,8 +14,9 @@ const spy = sinon.spy();
 test.beforeEach(spy.reset);
 
 test('on - add listenr', t => {
-    minitter.on('inc', spy);
+    const listener = minitter.on('inc', spy);
     t.is(minitter.listenerCount('inc'), 1);
+    t.is(listener, spy);
 });
 
 test('on - not added when listener aleady included', t => {
@@ -35,8 +36,9 @@ test('once - remove listener after event emitted', t => {
 });
 
 test('emit - emit listener function', t => {
-    minitter.emit('inc', 1);
+    const n = minitter.emit('inc', 1);
     t.true(spy.calledWith(1));
+    t.is(n, 1);
 });
 
 test('emit - not throw exception even if listener is not registered', t => {
@@ -44,6 +46,7 @@ test('emit - not throw exception even if listener is not registered', t => {
 });
 
 test('off - remove event listener', t => {
-    minitter.off('inc', spy);
+    const listener = minitter.off('inc', spy);
     t.is(minitter.listenerCount('inc'), 0);
+    t.is(listener, spy);
 });
