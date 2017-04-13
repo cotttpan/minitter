@@ -11,6 +11,7 @@ class Minitter {
         else {
             this._listeners[event] = [listener];
         }
+        return listener;
     }
     once(event, listener) {
         const wrapped = (arg) => {
@@ -21,11 +22,13 @@ class Minitter {
     }
     off(event, listener) {
         this._listeners[event] = this._listeners[event].filter(x => x !== listener);
+        return listener;
     }
     emit(event, arg) {
         if (this._listeners[event]) {
             this._listeners[event].forEach(f => f(arg));
         }
+        return arg;
     }
     listenerCount(event) {
         return this._listeners[event] ? this._listeners[event].length : 0;
