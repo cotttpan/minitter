@@ -1,4 +1,5 @@
 {
+    "defaultSeverity": "warn",
     // https://palantir.github.io/tslint/rules/
     "rules": {
         /* ###############################
