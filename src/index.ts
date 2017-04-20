@@ -11,22 +11,26 @@ export default class Minitter<T> {
     }
 
     once<K extends keyof T>(event: K, listener: Listener<T, K>) {
-        const wrapped = (arg: any) => {
-            listener(arg);
-            this.off(event, wrapped);
-        };
-        this.on(event, wrapped);
+        this.on(event, signature(listener, { once: true }));
     }
 
     off<K extends keyof T>(event: K, listener: Listener<T, K>) {
-        this._listeners[event] = this._listeners[event].filter(x => x !== listener);
+        const target = this._listeners[event];
+        const idx = target.indexOf(listener);
+        if (idx > -1) target.splice(idx, 1);
         return listener;
     }
 
     emit<K extends keyof T>(event: K, arg: T[K]) {
-        if (this._listeners[event]) {
-            this._listeners[event].forEach(f => f(arg));
-        }
+        const onceListener: Listener<T, K>[] = [];
+        const target = this._listeners[event];
+
+        target && target.forEach((x: any) => {
+            x(arg);
+            x.once && onceListener.push(x);
+        });
+
+        onceListener.forEach((x) => this.off(event, x));
         return arg;
     }
 
@@ -37,10 +41,17 @@ export default class Minitter<T> {
 
 export type Listener<T, K extends keyof T> = (arg: T[K]) => any;
 
-export function includes<T>(arr: T[], target: T) {
+function includes<T>(arr: T[], target: T) {
     return arr.indexOf(target) >= 0;
 }
 
-export function has(obj: object, target: string) {
+function has(obj: object, target: string) {
     return obj.hasOwnProperty(target);
+}
+
+function signature<T extends Function, S>(fn: T, sign: S): T & S {
+    const wrapped: any = function wrapped() {
+        return fn.apply(null, arguments);
+    };
+    return Object.assign(wrapped, sign);
 }

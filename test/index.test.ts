@@ -46,6 +46,7 @@ test('emit - not throw exception even if listener is not registered', t => {
 });
 
 test('off - remove event listener', t => {
+    t.is(minitter.listenerCount('inc'), 1);
     const listener = minitter.off('inc', spy);
     t.is(minitter.listenerCount('inc'), 0);
     t.is(listener, spy);
