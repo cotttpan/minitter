@@ -14,20 +14,23 @@ class Minitter {
         return listener;
     }
     once(event, listener) {
-        const wrapped = (arg) => {
-            listener(arg);
-            this.off(event, wrapped);
-        };
-        this.on(event, wrapped);
+        this.on(event, signature(listener, { once: true }));
     }
     off(event, listener) {
-        this._listeners[event] = this._listeners[event].filter(x => x !== listener);
+        const target = this._listeners[event];
+        const idx = target.indexOf(listener);
+        if (idx > -1)
+            target.splice(idx, 1);
         return listener;
     }
     emit(event, arg) {
-        if (this._listeners[event]) {
-            this._listeners[event].forEach(f => f(arg));
-        }
+        const onceListener = [];
+        const target = this._listeners[event];
+        target && target.forEach((x) => {
+            x(arg);
+            x.once && onceListener.push(x);
+        });
+        onceListener.forEach((x) => this.off(event, x));
         return arg;
     }
     listenerCount(event) {
@@ -38,9 +41,13 @@ exports.default = Minitter;
 function includes(arr, target) {
     return arr.indexOf(target) >= 0;
 }
-exports.includes = includes;
 function has(obj, target) {
     return obj.hasOwnProperty(target);
 }
-exports.has = has;
+function signature(fn, sign) {
+    const wrapped = function wrapped() {
+        return fn.apply(null, arguments);
+    };
+    return Object.assign(wrapped, sign);
+}
 //# sourceMappingURL=index.js.map

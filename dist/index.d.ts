@@ -7,5 +7,3 @@ export default class Minitter<T> {
     listenerCount<K extends keyof T>(event: K): number;
 }
 export declare type Listener<T, K extends keyof T> = (arg: T[K]) => any;
-export declare function includes<T>(arr: T[], target: T): boolean;
-export declare function has(obj: object, target: string): boolean;
